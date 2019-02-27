@@ -1,0 +1,7 @@
+version: '2'
+services:
+  pijuice:
+    build: ./pijuice
+    privileged: true
+  sample:
+    build: ./sample
