@@ -2,6 +2,13 @@ from time import sleep
 import sys, getopt, os
 sys.path.append('/usr/lib/python3.5/dist-packages') # temporary hack to import the piJuice module
 from pijuice import PiJuice
+from balena import Balena
+
+# Start the SDK if auth token is set
+if os.environ['AUTH_TOKEN']:
+    balena = Balena()
+    balena.auth.login_with_token(os.environ['AUTH_TOKEN'])
+    print( balena.auth.is_logged_in() )
 
 # Wait for device I2C device to start
 while not os.path.exists('/dev/i2c-1'):
@@ -39,10 +46,29 @@ def get_battery_paremeters(pijuice):
     iio = pijuice.status.GetIoCurrent()
     juice['iio'] = iio['data']/1000 if iio['error'] == 'NO_ERROR' else iio['error'] 
 
+    # Get power input (if power connected to the PiJuice board)
+    status = pijuice.status.GetStatus()
+    juice['power_input'] = status['data']['powerInput'] if status['error'] == 'NO_ERROR' else status['error'] 
+
+    # Get power input (if power connected to the Raspberry Pi board)
+    status = pijuice.status.GetStatus()
+    juice['power_input_board'] = status['data']['powerInput5vIo'] if status['error'] == 'NO_ERROR' else status['error'] 
+
     return juice
 
+i = 0
 while True:
+    i = i + 1
+    
+    #Print battery status every 5 seconds
+    battery_data = get_battery_paremeters(pijuice)
+    print(battery_data)
 
-    print(get_battery_paremeters(pijuice))
+    # Change tags every minute
+    if(i%12==0):
+        if balena.auth.is_logged_in():
+            print("logged.")
+        else:
+            print("not logged.")
 
     sleep(5)

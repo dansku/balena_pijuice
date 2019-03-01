@@ -1,9 +1,9 @@
 TAG_KEY=$1
-BALENA_ID=$2
-if ! [ "$BALENA_ID" ] ; then
-	BALENA_ID=$(curl "https://https://api.balena-cloud.com/v3/device?\$select=id,uuid&\$filter=uuid%20eq%20'$BALENA_DEVICE_UUID'" -H "Authorization: Bearer $BALENA_API_KEY" | jq '.d[0].id')
+RESIN_DEVICE_ID=$2
+if ! [ "$RESIN_DEVICE_ID" ] ; then
+	RESIN_DEVICE_ID=$(curl "https://api.balena-cloud.com/v4/device?\$select=id,uuid&\$filter=uuid%20eq%20'$RESIN_DEVICE_UUID'" -H "Authorization: Bearer $RESIN_API_KEY" | jq '.d[0].id')
 fi
 
-curl -X GET "https://https://api.balena-cloud.com/v3/device_tag?\$filter=((device%20eq%20$BALENA_ID)%20and%20(tag_key%20eq%20'$TAG_KEY'))" \
+curl -X GET "https://api.balena-cloud.com/v4/device_tag?\$filter=((device%20eq%20$RESIN_DEVICE_ID)%20and%20(tag_key%20eq%20'$TAG_KEY'))" \
 	-H "Content-Type:application/json" \
-	-H "Authorization: Bearer $BALENA_API_KEY"
+	-H "Authorization: Bearer $RESIN_API_KEY"
